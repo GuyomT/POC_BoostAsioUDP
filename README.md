@@ -6,6 +6,6 @@ g++ udpClient.cpp -o udpClient -lboost_system -lpthread
 g++ udpServer.cpp -o udpServer -lboost_system -lpthread
 
 ./udpServer
-./udpClient 8000 (not working atm)
+./udpClient localhost
 nc -4u -w1 localhost 8000
 ```
