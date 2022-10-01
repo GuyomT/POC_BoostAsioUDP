@@ -1,10 +1,12 @@
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
 #include <iostream>
+#include <time.h>
 
 using boost::asio::ip::udp;
 
 int main(int argc, char* argv[]) {
+    srand(time(NULL));
     try {
         if (argc != 2) {
             std::cerr << "Usage: client <host>" << std::endl;
@@ -22,8 +24,8 @@ int main(int argc, char* argv[]) {
 
         boost::array<char, 4> send_buf = {0};
         send_buf[0] = 64 & 0xff;
-        send_buf[1] = 'b';
-        send_buf[2] = 'c';
+        send_buf[1] = rand() % 256 & 0xff;
+        send_buf[2] = rand() % 256 & 0xff;
         socket.send_to(boost::asio::buffer(send_buf), receiver_endpoint);
         std::cout << "Sended\n";
 
