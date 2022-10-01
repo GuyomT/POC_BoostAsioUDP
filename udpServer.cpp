@@ -5,6 +5,7 @@
 #include <ctime>
 #include <iostream>
 #include <string>
+#include <stack>
 
 using boost::asio::ip::udp;
 
@@ -14,9 +15,9 @@ using boost::asio::ip::udp;
 //     return ctime(&now);
 // }
 
-class udp_server {
+class UdpServer {
    public:
-    udp_server(boost::asio::io_context& io_context)
+    UdpServer(boost::asio::io_context& io_context)
         : _socket(io_context, udp::endpoint(udp::v4(), 8000)) {
         start_receive();
     }
@@ -26,21 +27,31 @@ class udp_server {
         std::cout << "Start receiving\n";
         _socket.async_receive_from(
             boost::asio::buffer(_recv_buffer), _remote_endpoint,
-            boost::bind(&udp_server::handle_receive, this,
+            boost::bind(&UdpServer::handle_receive, this,
                         boost::asio::placeholders::error,
                         boost::asio::placeholders::bytes_transferred));
-    }
+        if (_recv_buffer[0] != 64)
+            return;
+        _stack_recv.push(_recv_buffer.data());
+        std::cout << _recv_buffer.data() << std::endl;
+        std::cout << "Stack :";
+        for (int i = 0; i < _stack_recv.size(); i++) {
+            std::cout << _stack_recv.top();
+            std::cout << " ";
+        }
+        std::cout << std::endl;
+        }
 
     void handle_receive(const boost::system::error_code& error,
                         std::size_t /*bytes_transferred*/) {
         if (!error) {
             // boost::shared_ptr<std::string> message(
-                // new std::string(make_daytime_string()));
+            // new std::string(make_daytime_string()));
             // std::cout << "Sending " << *message << std::endl;
             boost::shared_ptr<std::string> message(
                 new std::string("Hello from server"));
             _socket.async_send_to(boost::asio::buffer(*message), _remote_endpoint,
-                                  boost::bind(&udp_server::handle_send, this, message,
+                                  boost::bind(&UdpServer::handle_send, this, message,
                                               boost::asio::placeholders::error,
                                               boost::asio::placeholders::bytes_transferred));
 
@@ -55,13 +66,14 @@ class udp_server {
 
     udp::socket _socket;
     udp::endpoint _remote_endpoint;
-    boost::array<char, 1> _recv_buffer;
+    boost::array<char, 4> _recv_buffer;
+    std::stack<std::string> _stack_recv;
 };
 
 int main() {
     try {
         boost::asio::io_context io_context;
-        udp_server server(io_context);
+        UdpServer server(io_context);
         io_context.run();
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;

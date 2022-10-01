@@ -20,7 +20,10 @@ int main(int argc, char* argv[]) {
         udp::socket socket(io_service);
         socket.open(udp::v4());
 
-        boost::array<char, 1> send_buf = {0};
+        boost::array<char, 4> send_buf = {0};
+        send_buf[0] = 64 & 0xff;
+        send_buf[1] = 'b';
+        send_buf[2] = 'c';
         socket.send_to(boost::asio::buffer(send_buf), receiver_endpoint);
         std::cout << "Sended\n";
 
