@@ -5,22 +5,50 @@
 #include <ctime>
 #include <iostream>
 #include <string>
-#include <stack>
+#include <mutex>
+#include <queue>
+#include <list>
 
 using boost::asio::ip::udp;
 
-class UdpServer
-{
-public:
+// Simple mutex-guarded queue
+template <typename _T>
+class LockedQueue {
+   private:
+    std::mutex mutex;
+
+   public:
+    std::queue<_T> queue; //todo: make private
+    void push(_T value) {
+        std::unique_lock<std::mutex> lock(mutex);
+        queue.push(value);
+    };
+
+    // Get top message in the queue
+    // Note: not exception-safe (will lose the message)
+    _T pop() {
+        std::unique_lock<std::mutex> lock(mutex);
+        _T value;
+        std::swap(value, queue.front());
+        queue.pop();
+        return value;
+    };
+
+    bool empty() {
+        std::unique_lock<std::mutex> lock(mutex);
+        return queue.empty();
+    }
+};
+
+class UdpServer {
+   public:
     UdpServer(boost::asio::io_context &io_context)
-        : _socket(io_context, udp::endpoint(udp::v4(), 8000))
-    {
+        : _socket(io_context, udp::endpoint(udp::v4(), 8000)) {
         start_receive();
     }
 
-private:
-    void start_receive()
-    {
+   private:
+    void start_receive() {
         std::cout << "Start receiving\n";
         _socket.async_receive_from(
             boost::asio::buffer(_recv_buffer), _remote_endpoint,
@@ -30,10 +58,8 @@ private:
     }
 
     void handle_receive(const boost::system::error_code &error,
-                        std::size_t /*bytes_transferred*/)
-    {
-        if (!error)
-        {
+                        std::size_t /*bytes_transferred*/) {
+        if (!error) {
             boost::shared_ptr<std::string> message(
                 new std::string("Hello from server"));
             _socket.async_send_to(boost::asio::buffer(*message), _remote_endpoint,
@@ -42,40 +68,30 @@ private:
                                               boost::asio::placeholders::bytes_transferred));
 
             start_receive();
-            _stack_recv.push(_recv_buffer.data());
-            std::cout << _recv_buffer.data() << std::endl;
-            std::cout << "Stack :";
-            for (int i = 0; i < _stack_recv.size(); i++)
-            {
-                std::cout << _stack_recv.top();
-                std::cout << " ";
-            }
-            std::cout << std::endl;
+            std::cout << "Received: " << _recv_buffer.data() << std::endl;
+            _queue_recv.push(_recv_buffer.data());
+            std::cout << "Queue size: " << _queue_recv.queue.size() << std::endl;
+
         }
     }
 
     void handle_send(boost::shared_ptr<std::string> /*message*/,
                      const boost::system::error_code & /*error*/,
-                     std::size_t /*bytes_transferred*/)
-    {
+                     std::size_t /*bytes_transferred*/) {
     }
 
     udp::socket _socket;
     udp::endpoint _remote_endpoint;
     boost::array<char, 4> _recv_buffer;
-    std::stack<std::string> _stack_recv;
+    LockedQueue<std::string> _queue_recv;
 };
 
-int main()
-{
-    try
-    {
+int main() {
+    try {
         boost::asio::io_context io_context;
         UdpServer server(io_context);
         io_context.run();
-    }
-    catch (std::exception &e)
-    {
+    } catch (std::exception &e) {
         std::cerr << e.what() << std::endl;
     }
 
