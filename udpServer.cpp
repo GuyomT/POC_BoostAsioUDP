@@ -8,11 +8,11 @@
 
 using boost::asio::ip::udp;
 
-std::string make_daytime_string() {
-    using namespace std;  // For time_t, time and ctime;
-    time_t now = time(0);
-    return ctime(&now);
-}
+// std::string make_daytime_string() {
+//     using namespace std;  // For time_t, time and ctime;
+//     time_t now = time(0);
+//     return ctime(&now);
+// }
 
 class udp_server {
    public:
@@ -34,9 +34,11 @@ class udp_server {
     void handle_receive(const boost::system::error_code& error,
                         std::size_t /*bytes_transferred*/) {
         if (!error) {
+            // boost::shared_ptr<std::string> message(
+                // new std::string(make_daytime_string()));
+            // std::cout << "Sending " << *message << std::endl;
             boost::shared_ptr<std::string> message(
-                new std::string(make_daytime_string()));
-            std::cout << "Sending " << *message << std::endl;
+                new std::string("Hello from server"));
             _socket.async_send_to(boost::asio::buffer(*message), _remote_endpoint,
                                   boost::bind(&udp_server::handle_send, this, message,
                                               boost::asio::placeholders::error,
