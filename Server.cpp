@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-namespace NetworkLib {
+namespace Network {
 	Server::Server(unsigned short local_port) :
 		socket(io_service, udp::endpoint(udp::v4(), local_port)),
 		service_thread(&Server::run_service, this),

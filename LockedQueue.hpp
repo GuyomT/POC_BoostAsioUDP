@@ -1,11 +1,11 @@
 #pragma once
-#ifndef NETWORKLIB_LOCKEDQUEUE
-#define NETWORKLIB_LOCKEDQUEUE
+#ifndef NETWORK_LOCKEDQUEUE
+#define NETWORK_LOCKEDQUEUE
 #include <mutex>
 #include <queue>
 #include <list>
 
-namespace NetworkLib {
+namespace Network {
 	// Simple mutex-guarded queue
 	template<typename _T> class LockedQueue
 	{

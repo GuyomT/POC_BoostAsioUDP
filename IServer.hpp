@@ -2,7 +2,7 @@
 #include <string>
 #include <utility>
 
-namespace NetworkLib
+namespace Network
 {
 	typedef std::pair<std::string, unsigned int> ClientMessage;
 

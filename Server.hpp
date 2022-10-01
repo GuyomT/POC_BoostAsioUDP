@@ -17,7 +17,7 @@ using boost::asio::ip::udp;
 typedef std::map<uint32_t, udp::endpoint> ClientList;
 typedef ClientList::value_type Client;
 
-namespace NetworkLib {
+namespace Network {
 	class Server : public IServer {
 	public:
 		explicit Server(unsigned short local_port);
