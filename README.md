@@ -1,3 +1,5 @@
+[![Create Release](https://github.com/GuyomT/POC_BoostAsioUDP/actions/workflows/ci.yml/badge.svg)](https://github.com/GuyomT/POC_BoostAsioUDP/actions/workflows/ci.yml)
+
 # POC_BoostAsioUDP
 POC for R-Type project of a simple UDP server/client using boost asio
 
