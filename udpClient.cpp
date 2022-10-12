@@ -1,6 +1,7 @@
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
 #include <iostream>
+#include <array>
 #include <time.h>
 
 using boost::asio::ip::udp;
@@ -22,13 +23,13 @@ int main(int argc, char* argv[]) {
         udp::socket socket(io_service);
         socket.open(udp::v4());
 
-        boost::array<char, 4> send_buf = {0};
+        std::array<char, 3> send_buf = {0};
         send_buf[0] = 64 & 0xff;
-        send_buf[1] = rand() % 256 & 0xff;
-        send_buf[2] = rand() % 256 & 0xff;
-        socket.send_to(boost::asio::buffer(send_buf), receiver_endpoint);
-        std::cout << "Sended\n";
-
+        send_buf[1] = 0;
+        send_buf[2] = 255;
+        std::cout << "Sended: ";
+        std::cout << socket.send_to(boost::asio::buffer(send_buf), receiver_endpoint);
+        std::cout << std::endl;
         boost::array<char, 128> recv_buf;
         udp::endpoint sender_endpoint;
         std::cout << "Len:\n";

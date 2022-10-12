@@ -3,6 +3,7 @@
 #include <boost/bind/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <ctime>
+#include <array>
 #include <iostream>
 #include <string>
 #include <mutex>
@@ -58,8 +59,9 @@ class UdpServer {
     }
 
     void handle_receive(const boost::system::error_code &error,
-                        std::size_t /*bytes_transferred*/) {
+                        std::size_t size) {
         if (!error) {
+            std::cout << size << std::endl;
             boost::shared_ptr<std::string> message(
                 new std::string("Hello from server"));
             _socket.async_send_to(boost::asio::buffer(*message), _remote_endpoint,
@@ -68,7 +70,14 @@ class UdpServer {
                                               boost::asio::placeholders::bytes_transferred));
 
             start_receive();
-            std::cout << "Received: " << _recv_buffer.data() << std::endl;
+            std::cout << "Received: ";
+            for (size_t i = 0; i < size; i++) {
+                if (_recv_buffer[i] == 0)
+                    std::cout << "\\0";
+                else
+                    std::cout << _recv_buffer[i];
+            }
+            std::cout << std::endl;
             _queue_recv.push(_recv_buffer.data());
             std::cout << "Queue size: " << _queue_recv.queue.size() << std::endl;
 
@@ -82,8 +91,9 @@ class UdpServer {
 
     udp::socket _socket;
     udp::endpoint _remote_endpoint;
-    boost::array<char, 4> _recv_buffer;
+    std::array<char, 4> _recv_buffer;
     LockedQueue<std::string> _queue_recv;
+    boost::asio::streambuf replyBuf;
 };
 
 int main() {

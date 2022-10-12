@@ -1,39 +1,64 @@
+/*
+** EPITECH PROJECT, 2022
+** RTYPE
+** File description:
+** LockedQueue
+*/
+
 #pragma once
-#ifndef NETWORK_LOCKEDQUEUE
-#define NETWORK_LOCKEDQUEUE
+#include <list>
 #include <mutex>
 #include <queue>
-#include <list>
 
-namespace Network {
-	// Simple mutex-guarded queue
-	template<typename _T> class LockedQueue
-	{
-	private:
-		std::mutex mutex;
-		std::queue<_T> queue;
-	public:
-		void push(_T value)
-		{
-			std::unique_lock<std::mutex> lock(mutex);
-			queue.push(value);
-		};
+/**
+ * Simple mutex-guarded queue
+ */
+namespace network
+{
+    template <typename _T> class LockedQueue {
+      private:
+        /**
+         * Standard mutex class which lets us lock the queue
+         */
+        std::mutex mutex;
+        /**
+         * Templated standard queue class which lets us use the queue with any
+         * class
+         */
+        std::queue<_T> queue;
 
-		// Get top message in the queue
-		// Note: not exception-safe (will lose the message)
-		_T pop()
-		{
-			std::unique_lock<std::mutex> lock(mutex);
-			_T value;
-			std::swap(value, queue.front());
-			queue.pop();
-			return value;
-		};
+      public:
+        /**
+         * Function which pushes the value into the queue while locking it
+         *@param value value to push
+         */
+        void push(_T value)
+        {
+            std::unique_lock<std::mutex> lock(mutex);
+            queue.push(value);
+        };
 
-		bool empty() {
-			std::unique_lock<std::mutex> lock(mutex);
-			return queue.empty();
-		}
-	};
+        /**
+         * Get the top value of the queue
+         * @return return the front value
+         */
+        _T pop()
+        {
+            std::unique_lock<std::mutex> lock(mutex);
+            _T value;
+            std::swap(value, queue.front());
+            queue.pop();
+            return value;
+        };
+
+        /**
+         * Check if the queue is empty
+         *@return True if queue is empty
+         */
+        bool empty()
+        {
+            std::unique_lock<std::mutex> lock(mutex);
+            return queue.empty();
+        }
+    };
 }
-#endif
